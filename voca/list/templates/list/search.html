@@ -1,0 +1,79 @@
+{% extends 'list/base.html' %}
+{% load static %}
+{% block title %}단어 검색{% endblock %}
+{% block content %}
+
+{% if alert_word %}
+<script>
+  alert("{{ alert_word }}은(는) 이미 단어장에 있습니다.");
+</script>
+{% endif %}
+
+<form method="get" class="search-bar">
+    <input
+        type="text"
+        name="q"
+        placeholder="검색어를 입력해주세요."
+        value="{{ query|default_if_none:'' }}"
+    />
+    <button type="submit">
+        <img src="{% static 'list/img/search.svg' %}" alt="검색" />
+    </button>
+</form>
+
+{% if result %}
+<div class="result-card">
+  <h3>{{ result.word }}</h3>
+
+  {% for meaning in result.meanings %}
+    <p><strong>[{{ meaning.part_of_speech }}]</strong></p>
+    <ul>
+      {% for definition in meaning.definitions %}
+        <li>{{ definition }}</li>
+      {% endfor %}
+    </ul>
+  {% endfor %}
+
+  {% if result.example %}
+    <p><i>예문: {{ result.example }}</i></p>
+  {% endif %}
+
+  {% if result.pronunciation %}
+    <p>발음: [{{ result.pronunciation }}]</p>
+  {% endif %}
+
+  {% if result.audio %}
+    <audio controls src="{{ result.audio }}"></audio>
+  {% endif %}
+
+<!-- search.html (form 수정) -->
+<form method="post" action="{% url 'add' %}">
+  {% csrf_token %}
+  <input type="hidden" name="word" value="{{ result.word }}">
+  <input type="hidden" name="example" value="{{ result.example }}">
+  <input type="hidden" name="pronunciation" value="{{ result.pronunciation }}">
+  <input type="hidden" name="audio" value="{{ result.audio }}">
+  <input type="hidden" name="meanings_json" id="meanings_json">
+  <button type="submit" class="add-button">➕ 단어장에 추가</button>
+</form>
+
+<script>
+  // JSON 형식으로 의미+품사 저장
+  const meanings = [
+    {% for meaning in result.meanings %}
+      {% for definition in meaning.definitions %}
+        {
+          part_of_speech: "{{ meaning.part_of_speech }}",
+          definition: "{{ definition|escapejs }}"
+        },
+      {% endfor %}
+    {% endfor %}
+  ];
+  document.getElementById('meanings_json').value = JSON.stringify(meanings);
+</script>
+
+</div>
+{% endif %}
+
+
+{% endblock %}

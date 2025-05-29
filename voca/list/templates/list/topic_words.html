@@ -1,0 +1,55 @@
+{% extends 'list/base.html' %}
+{% block content %}
+
+<h2>📚 주제별 단어 - {{ category }}</h2>
+
+<!-- 카테고리 목록 -->
+<ul style="display: flex; flex-wrap: wrap; gap: 40px; padding: 0; list-style: none; margin: 30px 0;">
+  {% for c in categories %}
+    <li>
+      <a href="{% url 'topic_words' category=c.name %}"
+         style="display: inline-flex; align-items: center; gap: 4px; text-decoration: none; font-weight: 500; color: rebeccapurple;">
+        📁 {{ c.display_name }}
+      </a>
+    </li>
+  {% endfor %}
+</ul>
+
+
+{% if topics %}
+  <table style="width: 100%; border-collapse: collapse; text-align: left;">
+    <thead>
+      <tr style="border-bottom: 2px solid #ccc;">
+        <th style="padding: 10px;">단어</th>
+        <th style="padding: 10px;">의미</th>
+	<th style="padding: 10px.">품사</th> <!-- ✅ 품사 열 -->
+        <th style="padding: 10px;">🔍</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for word in topics %}
+        <tr style="border-bottom: 1px solid #eee;">
+          <td style="padding: 12px; font-weight: bold;">{{ word.text }}</td>
+          <td style="padding: 12px;">{{ word.meaning }}</td>
+	  <td>{{ word.part_of_speech|default:"-" }}</td> <!-- ✅ 품사 출력 -->
+          <td style="padding: 12px;">
+            <a href="{% url 'search' %}?q={{ word.text }}"
+               style="padding: 4px 8px; font-size: 12px; background-color: #e0e0e0; border-radius: 6px; text-decoration: none; color: #333;">
+              🔍
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+<div style="text-align: center; margin-top: 40px;">
+  <a href="{% url 'topic_quiz' category %}" class="add-button">
+    ✏️ 이 주제 단어 퀴즈 풀기
+  </a>
+</div>
+
+{% else %}
+  <p>이 카테고리에 등록된 단어가 없습니다.</p>
+{% endif %}
+
+{% endblock %}

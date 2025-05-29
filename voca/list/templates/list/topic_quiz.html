@@ -1,0 +1,25 @@
+{% extends 'list/base.html' %}
+{% block content %}
+<h2>✏️ 퀴즈 - {{ category }}</h2>
+<p>단어의 품사와 뜻을 직접 작성하세요.</p>
+
+<form method="POST">
+  {% csrf_token %}
+  <table>
+    <tr>
+      <th style="padding: 40px;">단어</th>
+       <th style="padding: 40px;">품사</th>
+       <th style="padding: 40px;">뜻</th>
+    </tr>
+    {% for word in words %}
+    <tr>
+     <td style="padding: 10px 16px;"><strong>{{ word.text }}</strong></td>
+      <td style="padding: 10px 16px;"><input type="text" name="pos_{{ word.id }}" placeholder="품사 입력"></td>
+     <td style="padding: 10px 16px;"><input type="text" name="meaning_{{ word.id }}" placeholder="뜻 입력" style="width: 300px;"></td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <button type="submit" class="add-button" style="margin-top: 20px;">📘 결과 확인</button>
+</form>
+{% endblock %}

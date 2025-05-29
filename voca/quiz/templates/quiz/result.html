@@ -1,0 +1,28 @@
+{% extends 'list/base.html' %}
+{% block content %}
+<h2>✅ 퀴즈 결과</h2>
+<p>{{ score }} / {{ total }} 개 정답입니다.</p>
+
+<form method="POST" action="{% url 'quiz:add_wrong_note' %}">
+  {% csrf_token %}
+  <p>❌ 틀린 문제 중 오답노트에 추가할 단어를 선택하세요:</p>
+
+  {% for q in questions %}
+    <div class="mb-3">
+      <strong>{{ forloop.counter }}. {{ q.word.text }}</strong><br>
+      👉 정답: {{ q.correct_answer }}<br>
+      📝 내 답: {{ q.user_answer }}
+      {% if not q.is_correct %}
+        <div>
+          <label><input type="checkbox" name="word_ids" value="{{ q.word.id }}"> 오답 노트에 추가</label>
+        </div>
+      {% else %}
+        <span style="color: green;">✔ 정답</span>
+      {% endif %}
+    </div>
+    <hr>
+  {% endfor %}
+
+  <button type="submit">➕ 오답 노트에 추가</button>
+</form>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% load static %}
+{% if messages %}
+  <div class="messages">
+    {% for message in messages %}
+      <div class="message {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Word Book{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'list/css/style.css' %}">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="menu-group">
+            <h2>Word Book</h2>
+            <ul class="nav">
+                <li class="{% if request.path == '/list/search/' %}active{% endif %}">
+                    <a href="{% url 'search' %}">
+                        <span class="icon">🔍</span>
+                        <span class="label">단어 검색</span>
+                    </a>
+                </li>
+                <li class="{% if request.path == '/list/wordbook/' %}active{% endif %}">
+                    <a href="{% url 'wordbook' %}">
+                        <span class="icon">📘</span>
+                        <span class="label">단어 노트</span>
+                    </a>
+                </li>
+
+<!-- base.html 내부 내비게이션 메뉴 영역 -->
+{% with categories.first as first_category %}
+  <li class="{% if '/topic/' in request.path %}active{% endif %}">
+    {% if first_category %}
+      <a href="{% url 'topic_words' first_category.name %}">
+        <span class="icon">📂</span>
+        <span class="label">주제별 단어</span>
+      </a>
+    {% else %}
+      <a href="#" onclick="alert('등록된 카테고리가 없습니다.'); return false;" style="opacity: 0.5; cursor: not-allowed;">
+        <span class="icon">📂</span>
+        <span class="label">주제별 단어</span>
+      </a>
+    {% endif %}
+  </li>
+{% endwith %}
+
+
+
+<li class="{% if request.path == '/list/wordbook/today/' %}active{% endif %}">
+  <a href="{% url 'today_wordbook' %}">
+    <span class="icon">📆</span>
+    <span class="label">오늘의 단어장</span>
+  </a>
+</li>
+
+
+
+
+<li class="{% if request.path|slice:":6" == '/quiz/' %}active{% endif %}">
+  <a href="{% url 'quiz:quiz_mode_select' %}">
+      <span class="icon">✏️</span>
+      <span class="label">단어 시험</span>
+  </a>
+</li>
+
+
+<li class="{% if request.path == '/quiz/wrong/' %}active{% endif %}">
+  <a href="{% url 'quiz:wrong_note' %}">
+      <span class="icon">❌</span>
+      <span class="label">오답 노트</span>
+  </a>
+</li>
+
+
+
+            </ul>
+        </div>
+
+<div class="logout">
+  {% if user.is_authenticated %}
+    👤 {{ user.username }}님<br>
+    <a href="{% url 'logout' %}">로그아웃</a>
+  {% else %}
+    <a href="{% url 'home' %}">로그인 / 회원가입</a>
+  {% endif %}
+</div>
+
+
+    </div>
+
+    <div class="main">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

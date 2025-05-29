@@ -1,0 +1,41 @@
+{% extends 'list/base.html' %}
+
+{% block content %}
+<h2>📘 단어 시험</h2>
+
+{# 오류 메시지 출력 #}
+{% if error %}
+  <p style="color: red;">{{ error }}</p>
+{% endif %}
+
+{# 퀴즈 데이터가 있을 경우만 폼 출력 #}
+{% if quiz_data %}
+<form method="POST" action="{% url 'quiz:submit' %}">
+  {% csrf_token %}
+
+  {% for item in quiz_data %}
+    <div class="mb-4">
+      <p><strong>{{ forloop.counter }}.
+        {% if item.type == "text" %}
+          {{ item.word }}
+        {% elif item.type == "audio" %}
+          🔊 <audio controls>
+            <source src="{{ item.audio }}" type="audio/mpeg">
+            Your browser does not support the audio element.
+          </audio>
+        {% endif %}
+      </strong></p>
+
+      {% for choice in item.choices %}
+        <label>
+          <input type="radio" name="answer_{{ forloop.parentloop.counter0 }}" value="{{ choice }}" required>
+          {{ choice }}
+        </label><br>
+      {% endfor %}
+    </div>
+  {% endfor %}
+
+  <button type="submit" class="add-button">제출</button>
+</form>
+{% endif %}
+{% endblock %}

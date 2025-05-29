@@ -1,0 +1,192 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>WordBook 로그인</title>
+    <link rel="stylesheet" href="{% static 'list/css/style.css' %}">
+    <style>
+        body {
+            background-color: #f5f6fa;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-box {
+            width: 400px;
+            background: #fff;
+            padding: 40px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            background-color: #5c6eff;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .login-box .bottom-link {
+            margin-top: 10px;
+            text-align: right;
+        }
+
+        .login-box .bottom-link button {
+            background: none;
+            border: none;
+            color: #5c6eff;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+
+        /* 모달 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 450px;
+            margin: 8% auto;
+            position: relative;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+        }
+
+        .modal-content .close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background-color: #5c6eff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <form method="post" class="login-box">
+        {% csrf_token %}
+        <div class="login-title">로그인</div>
+        {{ form.username }}
+        {{ form.password }}
+        <button type="submit">로그인</button>
+        <div class="bottom-link">
+            <button type="button" onclick="openSignupModal()">회원가입</button>
+        </div>
+    </form>
+
+    <!-- 회원가입 모달 -->
+    <div id="signupModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeSignupModal()">&times;</span>
+            <h2>회원가입</h2>
+            <form method="post" action="{% url 'signup_modal' %}">
+                {% csrf_token %}
+                {% for field in signup_form %}
+                    <div class="form-group">
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="field-error">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn-primary">회원가입</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openSignupModal() {
+            document.getElementById("signupModal").style.display = "block";
+        }
+
+        function closeSignupModal() {
+            document.getElementById("signupModal").style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById("signupModal");
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+
+<script>
+  function openSignupModal() {
+    document.getElementById("signupModal").style.display = "block";
+  }
+
+  function closeSignupModal() {
+    document.getElementById("signupModal").style.display = "none";
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById("signupModal");
+    if (event.target === modal) {
+      modal.style.display = "none";
+    }
+  }
+
+  // ✅ 서버에서 show_modal 변수가 온 경우 자동 열기
+  {% if show_modal %}
+    window.onload = function() {
+      openSignupModal();
+    };
+  {% endif %}
+</script>
+
+
+</body>
+</html>

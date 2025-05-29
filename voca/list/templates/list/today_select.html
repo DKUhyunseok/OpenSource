@@ -1,0 +1,26 @@
+{% extends 'list/base.html' %}
+{% block content %}
+<h2>📆 오늘의 단어장</h2>
+
+<form method="POST" action="{% url 'today_word_select' %}">
+  {% csrf_token %}
+  {% if words %}
+    <div class="card-grid">
+      {% for word in words %}
+        <div class="word-card">
+          <label>
+            <input type="checkbox" name="selected_words" value="{{ word.id }}" {% if word.is_today %}checked{% endif %}>
+            {{ word.text }}
+          </label>
+          <div class="meaning-box">{{ word.meaning }}</div>
+        </div>
+      {% endfor %}
+    </div>
+    <button type="submit" class="add-button" style="margin-top: 20px;">
+      ✅ 오늘의 단어장으로 설정
+    </button>
+  {% else %}
+    <p>단어 노트가 비어 있습니다.</p>
+  {% endif %}
+</form>
+{% endblock %}

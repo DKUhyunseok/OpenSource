@@ -1,0 +1,13 @@
+{% extends "admin/change_list.html" %}
+
+{% block content %}
+  {{ block.super }}
+  {% if csv_upload_form %}
+    <h3>📤 CSV 파일 업로드</h3>
+    <form method="post" enctype="multipart/form-data" style="margin-bottom: 2em;">
+      {% csrf_token %}
+      <input type="file" name="csv_file" accept=".csv" required>
+      <button type="submit" class="button">업로드</button>
+    </form>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends 'list/base.html' %}
+{% load static %}
+
+{% block title %}단어 노트{% endblock %}
+
+{% block content %}
+<h2>📘 단어 노트</h2>
+
+{% if words %}
+  <div class="card-grid">
+    {% for word in words %}
+      <div class="word-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0;">{{ word.text }}</h3>
+          <div style="display: flex; gap: 4px;">
+            <!-- 원래 방식: 모달 오픈 -->
+            <button type="button" class="detail-btn"
+              onclick="showDetailModal(`{{ word.text }}`, `{% for m in word.meanings.all %}[{{ m.part_of_speech }}] {{ m.meaning }}{% if not forloop.last %}<br>{% endif %}{% endfor %}`, `{{ word.example|default_if_none:"" }}`, `{{ word.pronunciation|default_if_none:"" }}`, `{{ word.audio_url|default_if_none:"" }}`)">
+              ➕
+            </button>
+
+            <form action="{% url 'delete_word' word.id %}" method="post" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+              {% csrf_token %}
+              <button type="submit" class="delete-btn">🗑</button>
+            </form>
+          </div>
+        </div>
+
+<div class="meaning-box short-meaning">
+  {% with word.meanings.all|first as first_meaning %}
+    {% if first_meaning %}
+      <strong>[{{ first_meaning.part_of_speech }}]</strong> {{ first_meaning.meaning }}
+    {% else %}
+      -
+    {% endif %}
+  {% endwith %}
+</div>
+
+        <div class="fill-space"></div>
+        <div class="meta">🗓 {{ word.added_at|date:"Y. m. d. A h:i" }}</div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p>단어 노트가 비어 있습니다.</p>
+{% endif %}
+
+<!-- 모달 -->
+<div id="detailModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h2 id="modalWord"></h2>
+    <p><strong>발음:</strong> <span id="modalPronunciation"></span></p>
+    <p><strong>예문:</strong> <span id="modalExample"></span></p>
+    <p><strong>의미:</strong> <span id="modalMeaning"></span></p>
+    <audio id="modalAudio" controls style="display: none; margin-top: 1rem;">
+      <source id="modalAudioSource" src="" type="audio/mpeg">
+      브라우저가 오디오 태그를 지원하지 않습니다.
+    </audio>
+  </div>
+</div>
+
+<style>
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.modal-content {
+  background-color: #fefefe;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 600px;
+}
+.close {
+  float: right;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+}
+</style>
+
+<script>
+function showDetailModal(word, meaningHtml, example, pronunciation, audio) {
+  document.getElementById('modalWord').innerText = word;
+  document.getElementById('modalMeaning').innerHTML = meaningHtml;
+  document.getElementById('modalExample').innerText = example || '-';
+  document.getElementById('modalPronunciation').innerText = pronunciation || '-';
+
+  const audioTag = document.getElementById('modalAudio');
+  const sourceTag = document.getElementById('modalAudioSource');
+
+  if (audio) {
+    sourceTag.src = audio;
+    audioTag.style.display = 'block';
+    audioTag.load();
+  } else {
+    audioTag.style.display = 'none';
+  }
+
+  document.getElementById('detailModal').style.display = 'block';
+}
+
+function closeModal() {
+  document.getElementById('detailModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById('detailModal');
+  if (event.target === modal) {
+    modal.style.display = 'none';
+  }
+}
+</script>
+{% endblock %}

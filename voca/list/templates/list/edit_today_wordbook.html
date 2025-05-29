@@ -1,0 +1,33 @@
+{% extends 'list/base.html' %}
+{% block content %}
+<h2>✏️ 오늘의 단어장 수정</h2>
+
+<form method="POST">
+  {% csrf_token %}
+  <table style="margin: 0 auto; border-collapse: collapse; width: 80%; text-align: left;">
+    <thead>
+      <tr>
+        <th style="padding: 12px;">선택</th>
+        <th style="padding: 12px;">단어</th>
+        <th style="padding: 12px;">오답 횟수</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for word in words %}
+      <tr>
+        <td style="padding: 10px;">
+          <input type="checkbox" name="word_ids" value="{{ word.id }}" {% if word.is_today %}checked{% endif %}>
+        </td>
+        <td style="padding: 10px;">{{ word.text }}</td>
+        <td style="padding: 10px;">{{ word.wrong_count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div style="text-align: center; margin-top: 24px;">
+    <button type="submit" class="add-button">💾 저장</button>
+  </div>
+</form>
+
+{% endblock %}
