@@ -12,6 +12,10 @@ class Word(models.Model):
     wrong_count = models.IntegerField(default=0)
     is_today = models.BooleanField(default=False)
     today_date = models.DateField(null=True, blank=True)
+    audio_file = models.FileField(upload_to='tts/', blank=True, null=True)
+    # Word 모델에 추가
+    translated_example = models.TextField(blank=True, null=True)
+
 
     def __str__(self):
         return self.text

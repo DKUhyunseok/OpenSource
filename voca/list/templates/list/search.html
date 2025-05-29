@@ -36,21 +36,39 @@
 
   {% if result.example %}
     <p><i>예문: {{ result.example }}</i></p>
+    <p><i>해석: {{ result.translated_example }}</i></p>
   {% endif %}
 
   {% if result.pronunciation %}
     <p>발음: [{{ result.pronunciation }}]</p>
   {% endif %}
 
-  {% if result.audio %}
-    <audio controls src="{{ result.audio }}"></audio>
-  {% endif %}
+<p>🎧 오디오 경로: /media/audio/{{ result.word }}.mp3</p>
+
+{% if result.audio %}
+  <audio controls>
+    <source src="{{ result.audio }}" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+{% else %}
+  {% with "media/audio/"|add:result.word|add:".mp3" as tts_path %}
+    <audio controls>
+      <source src="/{{ tts_path }}" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+  {% endwith %}
+{% endif %}
+
+
+
 
 <!-- search.html (form 수정) -->
 <form method="post" action="{% url 'add' %}">
   {% csrf_token %}
   <input type="hidden" name="word" value="{{ result.word }}">
   <input type="hidden" name="example" value="{{ result.example }}">
+  <input type="hidden" name="translated_example" value="{{ result.translated_example }}">
+
   <input type="hidden" name="pronunciation" value="{{ result.pronunciation }}">
   <input type="hidden" name="audio" value="{{ result.audio }}">
   <input type="hidden" name="meanings_json" id="meanings_json">

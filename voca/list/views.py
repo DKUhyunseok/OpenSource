@@ -8,9 +8,61 @@ from django.contrib.auth.decorators import login_required
 from .models import Word
 from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 
-
+import os
 import requests
+from django.conf import settings
+from django.core.files import File
+from django.core.files.storage import default_storage
+from .models import Word
+
+
+def generate_tts_and_save(word_obj):
+    """
+    ElevenLabs TTS API를 통해 단어의 오디오를 생성하고 저장한 후,
+    word.audio_url에 경로를 저장합니다.
+    """
+    if word_obj.audio_url and word_obj.audio_url.strip() != "":
+        return  # 오디오가 이미 있으면 skip
+
+    API_KEY = 'sk_25873f760bb4695cc39ccecd4afd01a20713f79ba43d4cab'
+    VOICE_ID = 'EXAVITQu4vr4xnSDxMaL'  # 기본 남성 영어 음성 ID
+    headers = {
+        'xi-api-key': API_KEY,
+        'Content-Type': 'application/json'
+    }
+    data = {
+        "text": word_obj.text,
+        "model_id": "eleven_monolingual_v1",
+        "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+        }
+    }
+
+    response = requests.post(
+        f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}",
+        headers=headers,
+        json=data
+    )
+
+    if response.status_code == 200:
+        folder = os.path.join(settings.MEDIA_ROOT, 'audio')
+        os.makedirs(folder, exist_ok=True)
+        filename = f"{word_obj.text}.mp3"
+        file_path = os.path.join(folder, filename)
+
+        with open(file_path, 'wb') as f:
+            f.write(response.content)
+
+        word_obj.audio_url = f"audio/{filename}"
+        word_obj.save()
+    else:
+        print("TTS API 호출 실패:", response.status_code, response.text)
+
+
+
 
 def translate_to_korean(text):
     url = "https://api-free.deepl.com/v2/translate"
@@ -53,7 +105,6 @@ def logout_view(request):
 def list_index(request):
     return redirect('search')  # name='search'는 urls.py에 정의된 것 기준
 
-
 def search_word(request):
     query = request.GET.get('q')
     result = None
@@ -89,10 +140,16 @@ def search_word(request):
                         'definitions': definitions
                     })
 
-                # 예문 처리
+                # 예문 처리 + 번역
                 example = ''
+                translated_example = ''
                 if entry.get('meanings') and entry['meanings'][0].get('definitions'):
                     example = entry['meanings'][0]['definitions'][0].get('example', '')
+                    if example:
+                        try:
+                            translated_example = translate_to_korean(example)
+                        except Exception:
+                            translated_example = ''
 
                 # 발음 및 오디오 처리
                 pronunciation = ''
@@ -101,10 +158,24 @@ def search_word(request):
                     pronunciation = entry['phonetics'][0].get('text', '')
                     audio = entry['phonetics'][0].get('audio', '')
 
+                # 오디오가 없으면 → TTS로 생성
+                if not audio:
+                    class TempWord:
+                        def __init__(self, text):
+                            self.text = text
+                            self.audio_url = ''
+                        def save(self): pass
+
+                    temp_word = TempWord(word)
+                    generate_tts_and_save(temp_word)
+                    if temp_word.audio_url:
+                        audio = f"/media/{temp_word.audio_url}"
+
                 result = {
                     'word': word,
                     'meanings': meanings,
                     'example': example,
+                    'translated_example': translated_example,
                     'pronunciation': pronunciation,
                     'audio': audio,
                 }
@@ -117,6 +188,7 @@ def search_word(request):
 
 
 
+
 from .models import WordMeaning
 
 @login_required
@@ -124,6 +196,7 @@ def add_to_wordbook(request):
     if request.method == 'POST':
         raw_word = request.POST['word']
         example = request.POST.get('example', '')
+        translated_example = request.POST.get('translated_example', '')
         pronunciation = request.POST.get('pronunciation', '')
         audio_url = request.POST.get('audio', '')
         meanings_json = request.POST.get('meanings_json', '[]')
@@ -141,9 +214,10 @@ def add_to_wordbook(request):
                 user=request.user,
                 text=normalized_word,
                 example=example,
+                translated_example=translated_example,
                 pronunciation=pronunciation,
-                audio_url=audio_url
             )
+
             for item in meaning_items:
                 WordMeaning.objects.create(
                     word=word,
@@ -151,15 +225,15 @@ def add_to_wordbook(request):
                     meaning=item.get('definition', '')
                 )
 
+            if audio_url.strip():
+                word.audio_url = audio_url.strip()
+                word.save()
+            else:
+                generate_tts_and_save(word)  # 이 함수 안에서 word.save() 처리됨
+
         return redirect('search')
 
     return redirect('search')
-
-
-
-def wordbook(request):
-    words = Word.objects.all().order_by('-added_at')
-    return render(request, 'list/wordbook.html', {'words': words})
 
 
 @login_required
@@ -167,16 +241,6 @@ def word_detail(request, word_id):
     word = get_object_or_404(Word, id=word_id, user=request.user)
     return render(request, 'list/word_detail.html', {'word': word})
 
-def login_view(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('wordbook')
-    else:
-        form = AuthenticationForm()
-    return render(request, 'list/login.html', {'form': form})
 
 def signup_view(request):
     if request.method == 'POST':
@@ -324,3 +388,39 @@ def word_detail_modal(request, word_id):
     word = get_object_or_404(Word, id=word_id, user=request.user)
     html = render_to_string('list/word_detail.html', {'word': word}, request=request)
     return JsonResponse({'html': html})
+
+
+
+@login_required
+def manual_add_word(request):
+    if request.method == 'POST':
+        word_text = request.POST.get('word', '').strip().lower()
+        meaning_text = request.POST.get('meaning', '').strip()
+        example = request.POST.get('example', '').strip()
+        translated_example = request.POST.get('translated_example', '').strip()
+        pronunciation = request.POST.get('pronunciation', '').strip()
+
+        if not word_text or not meaning_text:
+            return HttpResponse("<script>alert('단어와 뜻은 필수입니다.');history.back();</script>")
+
+        if Word.objects.filter(user=request.user, text=word_text).exists():
+            return HttpResponse(f"<script>alert('이미 \"{word_text}\" 단어가 등록되어 있습니다.');history.back();</script>")
+
+        word = Word.objects.create(
+            user=request.user,
+            text=word_text,
+            example=example,
+            translated_example=translated_example,  # ✅ 추가
+            pronunciation=pronunciation,
+        )
+        WordMeaning.objects.create(
+            word=word,
+            part_of_speech='manual',
+            meaning=meaning_text
+        )
+
+        generate_tts_and_save(word)
+
+        return redirect('wordbook')
+
+    return render(request, 'list/manual_add.html')

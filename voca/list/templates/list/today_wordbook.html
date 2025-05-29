@@ -21,7 +21,14 @@
           <h3 style="margin: 0;">{{ word.text }}</h3>
           <div style="display: flex; gap: 4px;">
             <button type="button" class="detail-btn"
-              onclick="showDetailModal(`{{ word.text }}`, `{% for m in word.meanings.all %}[{{ m.part_of_speech }}] {{ m.meaning }}{% if not forloop.last %}<br>{% endif %}{% endfor %}`, `{{ word.example|default_if_none:"" }}`, `{{ word.pronunciation|default_if_none:"" }}`, `{{ word.audio_url|default_if_none:"" }}`)">
+              onclick="showDetailModal(
+                `{{ word.text }}`,
+                `{% for m in word.meanings.all %}[{{ m.part_of_speech }}] {{ m.meaning }}{% if not forloop.last %}<br>{% endif %}{% endfor %}`,
+                `{{ word.example|default_if_none:"" }}`,
+                `{{ word.translated_example|default_if_none:"" }}`,
+                `{{ word.pronunciation|default_if_none:"" }}`,
+                `{{ word.audio_url|default_if_none:"" }}`
+              )">
               ➕
             </button>
           </div>
@@ -54,6 +61,7 @@
     <h2 id="modalWord"></h2>
     <p><strong>발음:</strong> <span id="modalPronunciation"></span></p>
     <p><strong>예문:</strong> <span id="modalExample"></span></p>
+    <p><strong>예문 해석:</strong> <span id="modalExampleKor"></span></p>
     <p><strong>의미:</strong> <span id="modalMeaning"></span></p>
     <audio id="modalAudio" controls style="display: none; margin-top: 1rem;">
       <source id="modalAudioSource" src="" type="audio/mpeg">
@@ -88,10 +96,11 @@
 </style>
 
 <script>
-function showDetailModal(word, meaningHtml, example, pronunciation, audio) {
+function showDetailModal(word, meaningHtml, example, exampleKor, pronunciation, audio) {
   document.getElementById('modalWord').innerText = word;
   document.getElementById('modalMeaning').innerHTML = meaningHtml;
   document.getElementById('modalExample').innerText = example || '-';
+  document.getElementById('modalExampleKor').innerText = exampleKor || '-';
   document.getElementById('modalPronunciation').innerText = pronunciation || '-';
 
   const audioTag = document.getElementById('modalAudio');

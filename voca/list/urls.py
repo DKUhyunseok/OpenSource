@@ -16,6 +16,7 @@ urlpatterns = [
     path('wordbook/today/', views.today_wordbook, name='today_wordbook'),
     path('wordbook/today/edit/', views.edit_today_wordbook, name='edit_today_wordbook'),
     path('word/<int:word_id>/', views.word_detail, name='word_detail'),
+    path('wordbook/add/', views.manual_add_word, name='manual_add_word'),
 
 
     path('topic/<str:category>/quiz/', views.topic_quiz, name='topic_quiz'),
