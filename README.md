@@ -319,24 +319,24 @@ DeepL·Papago API를 사용해 영어 예문을 한국어로 번역.
 
 ### `start_quiz(request)`
 * **설명**  
-  1. 로그인 사용자의 *오늘의 단어장*(`Word.is_today=True`) 로드  
-  2. (audio 모드) `audio_url`이 없는 단어 제외  
-  3. 단어 개수 < 4 ⇒ 오류 메시지 반환  
-  4. 최대 5개 단어를 무작위 선정, 각 단어의 의미를 정답으로 삼고 나머지 단어의 의미로 오답 보기(4지선다) 구성  
-  5. 문제 리스트를 `request.session['quiz_data']`에 저장 후 `quiz/quiz.html` 렌더  
+로그인 사용자의 *오늘의 단어장*(`Word.is_today=True`) 로드  
+(audio 모드) `audio_url`이 없는 단어 제외  
+단어 개수 < 4 ⇒ 오류 메시지 반환  
+최대 5개 단어를 무작위 선정, 각 단어의 의미를 정답으로 삼고 나머지 단어의 의미로 오답 보기(4지선다) 구성  
+문제 리스트를 `request.session['quiz_data']`에 저장 후 `quiz/quiz.html` 렌더  
 
 ---
 
 ### `submit_quiz(request)`
 * **설명**  
-  1. 세션에 저장된 `quiz_data`가 없으면 `/quiz/start/`로 리다이렉트  
-  2. `QuizResult` 레코드 생성 (score = 0)  
-  3. 각 문제에 대해 사용자의 답(`answer_i`)과 정답 비교  
-     * 정답 → `correct_count ++`  
-     * 오답 → 해당 Word의 `wrong_count ++`, `is_wrong=True` 설정  
-     * `QuizQuestion` 레코드에 선택지·정오답 저장  
-  4. 최종 점수를 `QuizResult.score`에 기록, 세션 `quiz_data` 삭제  
-  5. `quiz/result.html` 렌더 (`score`, `total`, `questions` 전달)  
+세션에 저장된 `quiz_data`가 없으면 `/quiz/start/`로 리다이렉트  
+`QuizResult` 레코드 생성 (score = 0)  
+각 문제에 대해 사용자의 답(`answer_i`)과 정답 비교  
+* 정답 → `correct_count ++`  
+* 오답 → 해당 Word의 `wrong_count ++`, `is_wrong=True` 설정  
+* `QuizQuestion` 레코드에 선택지·정오답 저장  
+최종 점수를 `QuizResult.score`에 기록, 세션 `quiz_data` 삭제  
+`quiz/result.html` 렌더 (`score`, `total`, `questions` 전달)  
 
 ---
 
