@@ -319,11 +319,11 @@ DeepL·Papago API를 사용해 영어 예문을 한국어로 번역.
 
 | 영역 | 제안 내용 | 기대 효과 |
 |------|-----------|-----------|
-| **보안** | • 비밀번호 재설정 이메일<br>• `django‑axes` Brute‑force 방지<br>• CSRF 쿠키 `SameSite=Strict` | 계정 도용·무차별 대입 공격 예방 |
-| **UX / UI** | • Tailwind CSS 리디자인<br>• PWA(Service Worker) → 오프라인 퀴즈<br>• 다크 모드 토글 | 반응형·모바일 경험 향상 |
-| **성능** | • Redis 캐시 + Celery 비동기 TTS 생성<br>• DB 쿼리 프로파일링 & 인덱스 최적화 | 페이지 로드·API 응답 지연 최소화 |
-| **배포** | • Dockerfile + docker‑compose (gunicorn + nginx) <br>• AWS RDS / Aurora 도입 | 배포 일관성·스케일 아웃 용이 |
-| **데이터 분석** | • 학습 진척도 Dash (사용자별 퀴즈 정확도 차트)<br>• Spaced Repetition 알고리즘 | 개인화 학습 효과 극대화 |
-| **알림** | • Email / WebPush 알림: “오늘의 단어 퀴즈 시간!” | 사용자 Engagement ↑ |
-| **접근성** | • aria‑label, 키보드 내비게이션<br>• 오디오 컨트롤 키보드 단축키 | A11y 적합성 확보 |
+| **보안** | • 비밀번호 재설정 이메일<br>• `django‑axes` Brute‑force 방지<br>• CSRF 쿠키 | 계정 도용·무차별 대입 공격 예방 |
+| **UX / UI** | • 오프라인 퀴즈<br>• 다크 모드| 반응형·모바일 경험 향상 |
+| **성능** | • Redis 캐시 + Celery 비동기 TTS <br>• DB 쿼리 프로파일링 & 인덱스 최적화 | 페이지 로드·API 응답 지연 최소화 |
+| **배포** | • Dockerfile + docker‑compose | 배포 일관성·스케일 아웃 용이 |
+| **데이터 분석** | • 학습 진척도 Dash (사용자별 퀴즈 정확도 차트)| 개인화 학습 효과 극대화 |
+| **알림** | • Email / WebPush 알림: “오늘의 단어 퀴즈 시간” | 사용자 경험 상승 |
+| **접근성** | • 키보드 내비게이션<br>• 오디오 컨트롤 키보드 단축키 | A11y 적합성 확보 |
 
