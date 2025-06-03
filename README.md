@@ -158,7 +158,7 @@ $ python manage.py runserver
 
 
 
-# OpenSource-main 디렉토리 구조
+## 3. OpenSource-main 디렉토리 구조
 
 ```
 OpenSource-main/
@@ -245,3 +245,71 @@ OpenSource-main/
 | meaning        | TextField            | 뜻            |
 | created_at     | DateTimeField        | 생성일시      |
 | part_of_speech | CharField(50)        | 품사          |
+
+# 4. 주요 함수
+
+voca 프로젝트 내 Django View / 유틸 함수  
+함수 핵심 동작을 요약
+---
+
+## `list/views.py`
+
+### `word_detail(request, word_id)`
+단어 상세 페이지(또는 모달)를 렌더링합니다. `word_id`로 사용자 소유 **Word** 인스턴스를 조회하고 품사·뜻(`WordMeaning`)과 발음·예문을 포함해 템플릿 `word_detail.html`(또는 모달 partial)에 전달합니다. 없는 경우 404 또는 redirect.
+
+### `wordbook(request)`
+사용자 단어장(Word Note) 메인 화면을 보여줍니다. 로그인 사용자의 `Word`를 최신 저장 순으로 페이지네이션하여 `word_note.html` 템플릿에 전달합니다.
+
+### `delete_word(request, word_id)`
+Word 인스턴스를 삭제합니다. **POST** 요청만 허용하며, 성공 시 단어장 목록으로 redirect.
+
+### `today_wordbook(request)`
+`is_today=True` 로 필터링된 단어만 보여주는 **오늘의 단어장** 페이지를 렌더링합니다. 비어 있으면 편집 화면 안내.
+
+### `edit_today_wordbook(request)`
+오늘 학습할 단어를 선택·저장하는 편집 폼 처리. **POST** 요청에서 체크된 `word_ids`를 받아 `is_today` 플래그 갱신 후 `today_wordbook`으로 redirect.
+
+### `word_detail_modal(request, word_id)`
+AJAX 전용: 단어 카드의 ‘+’ 버튼 클릭 시 비동기 요청으로 단어 상세 HTML 조각 반환.
+
+### `manual_add_word(request)`
+API 실패 시 수동으로 단어·뜻·품사를 입력해 Word 저장. **GET**: 폼, **POST**: 저장.
+
+### `list_index(request)`
+‘단어 목록(Home)’ 대시보드. 검색, 단어장 바로가기 카드 등을 종합적으로 표시.
+
+### `search_word(request)`
+검색어를 외부 사전 API로 조회해 결과를 JSON 또는 HTML로 반환. 필요 시 `generate_tts_and_save` · `translate_to_korean` 호출.
+
+### `add_to_wordbook(request)`
+검색 결과에서 ‘단어장에 추가’ 클릭 시 Word 저장. 이미 존재하면 JSON으로 ‘중복’ 메시지.
+
+### `topic_quiz(request, category)`
+선택한 **Category**의 `TopicWord`로 즉시 퀴즈를 생성·출제.
+
+---
+
+### `home(request)`
+Landing 페이지. 로그인 여부에 따라 리다이렉트 또는 소개 페이지 렌더.
+
+### `logout_view(request)`
+Django `logout()` 호출 후 로그인 페이지로 redirect.
+
+---
+
+### `signup_view(request)`
+회원가입 폼 표시·처리. 성공 시 로그인 페이지로 redirect.
+
+### `signup_modal(request)`
+모달 기반 회원가입(AJAX). POST 시 JSON 응답.
+
+### `login_view(request)`
+로그인 폼 표시·처리. 성공 시 `next` 파라미터 또는 홈으로 redirect.
+
+---
+
+### `generate_tts_and_save(word_obj)`
+외부 TTS API 호출로 음성 파일(mp3)을 생성 후 `word_obj.audio_url`에 저장. 이미 파일이 있으면 건너뜀.
+
+### `translate_to_korean(text)`
+DeepL·Papago API를 사용해 영어 예문을 한국어로 번역.
