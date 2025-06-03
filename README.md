@@ -315,6 +315,60 @@ Django `logout()` 호출 후 로그인 페이지로 redirect.
 DeepL·Papago API를 사용해 영어 예문을 한국어로 번역.
 
 
+## `quiz/views.py`
+
+### `start_quiz(request)`
+* **설명**  
+  1. 로그인 사용자의 *오늘의 단어장*(`Word.is_today=True`) 로드  
+  2. (audio 모드) `audio_url`이 없는 단어 제외  
+  3. 단어 개수 < 4 ⇒ 오류 메시지 반환  
+  4. 최대 5개 단어를 무작위 선정, 각 단어의 의미를 정답으로 삼고 나머지 단어의 의미로 오답 보기(4지선다) 구성  
+  5. 문제 리스트를 `request.session['quiz_data']`에 저장 후 `quiz/quiz.html` 렌더  
+
+---
+
+### `submit_quiz(request)`
+* **설명**  
+  1. 세션에 저장된 `quiz_data`가 없으면 `/quiz/start/`로 리다이렉트  
+  2. `QuizResult` 레코드 생성 (score = 0)  
+  3. 각 문제에 대해 사용자의 답(`answer_i`)과 정답 비교  
+     * 정답 → `correct_count ++`  
+     * 오답 → 해당 Word의 `wrong_count ++`, `is_wrong=True` 설정  
+     * `QuizQuestion` 레코드에 선택지·정오답 저장  
+  4. 최종 점수를 `QuizResult.score`에 기록, 세션 `quiz_data` 삭제  
+  5. `quiz/result.html` 렌더 (`score`, `total`, `questions` 전달)  
+
+---
+
+### `wrong_note(request)`
+* **설명**  
+  * 사용자가 최근 틀린 단어를 `QuizQuestion` → `is_correct=False`, `Word.is_wrong=True` 조건으로 조회  
+  * 단어 ID별로 가장 최근 오답만 남겨 중복 제거  
+  * `quiz/wrong_note.html` 템플릿에 `wrong_items` 컨텍스트 전달  
+
+---
+
+### `add_wrong_note(request)`  
+* **설명**  
+  * 요청 폼의 `word_ids` 리스트를 받아 해당 Word 레코드의 `is_wrong=True`로 일괄 업데이트  
+  * 완료 후 오답 노트 페이지(`quiz:wrong_note`)로 리다이렉트  
+
+---
+
+### `remove_wrong_flag(request, word_id)`
+* **설명**  
+  * 지정 Word를 조회(`get_object_or_404`) 후 `is_wrong=False`로 변경  
+  * 오답 노트 페이지로 리다이렉트  
+
+---
+
+### `select_quiz_mode(request)`
+* **설명**  
+  * 텍스트/오디오 중 퀴즈 모드 선택 화면(`quiz/quiz_mode_select.html`) 렌더  
+
+---
+
+
 # 5. 개선·확장 제안
 
 | 영역 | 제안 내용 | 기대 효과 |
