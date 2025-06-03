@@ -104,6 +104,60 @@
 
 
 
+
+
+# Developer's Guide (개발자 가이드)
+
+## 1. 기술 스택
+
+- **Backend**: Python, Django  
+- **Database**: SQLite, PostgreSQL  
+- **Frontend**: Django Templates + CSS / HTMX (모달 기반 인터페이스)  
+- **External APIs**:  
+  - DictionaryAPI – 단어 사전 검색 데이터  
+  - DeepL API – 뜻 번역, 예문 번역  
+  - ElevenLabs TTS – 단어 오디오(mp3) 생성  
+
+---
+
+## 2. 설정 방법
+
+### 1) 클론 & 가상환경 설정
+
+```bash
+$ git clone https://github.com/DKUhyunseok/OpenSource.git
+$ cd OpenSource
+$ cd voca
+```
+
+### 2) 의존성 설치
+
+Django 백엔드 의존성 설치:
+
+```bash
+$ pip install -r requirements.txt
+```
+
+### 3) 환경 변수 설정
+
+`.env` 파일 또는 `settings.py`에 아래와 같이 외부 API 키를 등록해야 합니다:
+
+- `elevenlabs API`: 개인 키 필요 (부분 무료/유료)
+- `deepl API`: 개인 키 필요 (부분 무료/유료)
+- `freedictionary API`: 무료 사용 가능
+
+### 4) 개발 서버 실행
+
+Django 서버 실행:
+
+```bash
+$ python manage.py runserver
+```
+
+로컬 주소: http://127.0.0.1:8000
+
+
+
 # OpenSource-main 디렉토리 구조
 
 ```
