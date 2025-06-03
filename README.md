@@ -100,3 +100,55 @@
 - 카테고리에 단어를 직접 추가하거나 **CSV 업로드**로 대량 등록 가능
 
 ---
+
+
+
+# 📄 Django 모델 정의
+
+## 📌 Word 모델
+
+| 필드명              | 타입                  | 설명                 |
+|---------------------|-----------------------|----------------------|
+| user                | ForeignKey(User)      | 단어 등록 유저       |
+| text                | CharField(100)        | 단어 본문            |
+| example             | TextField             | 예문                 |
+| pronunciation       | CharField(100)        | 발음                 |
+| audio_url           | URLField              | TTS 오디오 링크       |
+| audio_file          | FileField             | 업로드된 오디오 파일 |
+| added_at            | DateTimeField         | 등록일               |
+| is_wrong            | BooleanField          | 오답 여부            |
+| wrong_count         | IntegerField          | 오답 횟수            |
+| is_today            | BooleanField          | 오늘의 단어 여부     |
+| today_date          | DateField             | 오늘 날짜            |
+| translated_example  | TextField             | 예문 번역            |
+
+---
+
+## 📌 WordMeaning 모델
+
+| 필드명         | 타입               | 설명       |
+|----------------|--------------------|------------|
+| word           | ForeignKey(Word)   | 연결된 단어 |
+| part_of_speech | CharField(50)      | 품사       |
+| meaning        | TextField          | 뜻         |
+
+---
+
+## 📌 Category 모델
+
+| 필드명       | 타입             | 설명        |
+|--------------|------------------|-------------|
+| name         | CharField(20)    | 내부 명칭   |
+| display_name | CharField(20)    | 사용자용 명칭 |
+
+---
+
+## 📌 TopicWord 모델
+
+| 필드명         | 타입                 | 설명          |
+|----------------|----------------------|---------------|
+| category       | ForeignKey(Category) | 연결 카테고리 |
+| text           | CharField(100)       | 단어          |
+| meaning        | TextField            | 뜻            |
+| created_at     | DateTimeField        | 생성일시      |
+| part_of_speech | CharField(50)        | 품사          |
